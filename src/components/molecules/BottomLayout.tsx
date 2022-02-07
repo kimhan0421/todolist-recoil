@@ -8,11 +8,11 @@ export default function BottomLayout({ children }: BottomLayoutProps) {
   return (
     <Box
       sx={{
-        width: 428,
-        height: 64,
-        bottom: 24,
-        right: 24,
+        height: 56,
         position: 'fixed',
+        bottom: 24,
+        paddingLeft: 44,
+        margin: 'auto',
       }}
     >
       {children}

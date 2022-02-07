@@ -1,5 +1,6 @@
-import { AppBar, Toolbar as MUIToolbar, Typography } from '@mui/material';
 import { useRecoilValue } from 'recoil';
+import { AppBar, Toolbar as MUIToolbar, Typography } from '@mui/material';
+
 import { title } from 'store';
 
 export default function Toolbar() {

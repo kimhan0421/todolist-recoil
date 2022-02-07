@@ -1,22 +1,89 @@
-import { atom, selector } from 'recoil';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+  atom,
+  selectorFamily,
+  useRecoilTransaction_UNSTABLE,
+  useRecoilValue,
+} from 'recoil';
 
-export const title = atom({
-  key: 'title',
-  default: 0,
-});
+import { autoSaveLocalStorage, makeUseOnChange } from './common';
 
-const promise = new Promise<void>((res, rej) => {
-  setTimeout(() => {
-    void res();
-  }, 3000);
-});
+export interface TodoListProps {
+  id: number;
+  title: string;
+  contents: string;
+  isCompleted: boolean;
+}
 
-export const select = selector({
-  key: 'select',
-  get: async ({ get }) => {
-    await promise;
-    const t = get(title);
-    return t * 100;
+export const todoListInput = atom({
+  key: 'todoListInput',
+  default: {
+    title: '',
+    contents: '',
   },
-  cachePolicy_UNSTABLE: { eviction: 'most-recent' },
 });
+
+export const todoList = atom<TodoListProps[]>({
+  key: 'todoList',
+  default: [],
+  effects_UNSTABLE: [autoSaveLocalStorage()],
+});
+
+export const title = atom<string>({
+  key: 'title',
+  default: 'TODO LIST',
+});
+
+export const selectItem = selectorFamily({
+  key: 'selectItem',
+  get:
+    (id: string | undefined | null) =>
+    ({ get }) => {
+      const list = get(todoList);
+
+      for (const item of list) {
+        if (item.id === Number(id)) {
+          return item.contents;
+        }
+      }
+
+      return null;
+    },
+});
+
+export const useContents = () => {
+  const { id } = useParams();
+  return useRecoilValue(selectItem(id));
+};
+
+export const useOnChange = makeUseOnChange(todoListInput);
+
+export const useAddTodo = () => {
+  const navigate = useNavigate();
+
+  return useRecoilTransaction_UNSTABLE(
+    ({ get, set, reset }) =>
+      () => {
+        const input = get(todoListInput);
+        const todo = get(todoList);
+        const nextId = todo.length > 0 ? todo[todo.length - 1].id + 1 : 1;
+
+        if (!input.title.trim() || !input.contents.trim()) {
+          return null;
+        }
+
+        set(todoList, (v) => [
+          ...v,
+          {
+            id: nextId,
+            title: input.title,
+            contents: input.contents,
+            isCompleted: false,
+          },
+        ]);
+        reset(todoListInput);
+        navigate('/');
+      },
+    [],
+  );
+};
