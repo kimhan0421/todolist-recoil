@@ -1,17 +1,37 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import { useRecoilValue } from 'recoil';
 
-import { useContents } from 'store';
+import { editState, useContents } from 'store';
+import CreateTextField from './CreateTextField';
 
 export default function Contents() {
   const contents = useContents();
+  const edit = useRecoilValue(editState);
 
-  return (
+  return edit ? (
+    <Box
+      component="form"
+      mt={2}
+      sx={{
+        '& .MuiTextField-root': { m: 2, width: '38ch' },
+      }}
+      noValidate
+      autoComplete="off"
+    >
+      <CreateTextField />
+    </Box>
+  ) : (
     <Box
       mt={2}
       component="div"
       sx={{ whiteSpace: 'normal', overflow: 'auto', maxHeight: 500 }}
     >
-      {contents}
+      <Typography variant="h5" component="div">
+        {contents?.title}
+      </Typography>
+      <Typography variant="body1" mt={2}>
+        {contents?.contents}
+      </Typography>
     </Box>
   );
 }

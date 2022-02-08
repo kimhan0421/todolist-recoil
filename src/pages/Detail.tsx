@@ -1,11 +1,11 @@
 import Contents from 'components/organisms/Contents';
-import EditButton from 'components/organisms/EditButton';
+import IsShowEditButton from 'components/organisms/IsShowEditButton';
 
 export default function Detail() {
   return (
     <>
       <Contents />
-      <EditButton />
+      <IsShowEditButton />
     </>
   );
 }

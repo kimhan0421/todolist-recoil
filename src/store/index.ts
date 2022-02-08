@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   atom,
   selectorFamily,
   useRecoilTransaction_UNSTABLE,
   useRecoilValue,
+  useResetRecoilState,
 } from 'recoil';
 
 import { autoSaveLocalStorage, makeUseOnChange } from './common';
@@ -43,7 +45,7 @@ export const selectItem = selectorFamily({
 
       for (const item of list) {
         if (item.id === Number(id)) {
-          return item.contents;
+          return item;
         }
       }
 
@@ -82,6 +84,65 @@ export const useAddTodo = () => {
           },
         ]);
         reset(todoListInput);
+        navigate('/');
+      },
+    [],
+  );
+};
+
+export const editState = atom({
+  key: 'editState',
+  default: false,
+});
+
+export const useResetInput = () => {
+  const reset = useResetRecoilState(todoListInput);
+  useEffect(() => {
+    return () => reset();
+  }, []);
+};
+
+export const useEditState = () => {
+  const origin = useContents();
+
+  return useRecoilTransaction_UNSTABLE(
+    ({ set }) =>
+      () => {
+        set(editState, (state) => !state);
+        if (origin) {
+          set(todoListInput, (s) => ({
+            ...s,
+            title: origin.title,
+            contents: origin.contents,
+          }));
+        }
+      },
+    [],
+  );
+};
+
+export const useEditTodo = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  return useRecoilTransaction_UNSTABLE(
+    ({ get, set, reset }) =>
+      () => {
+        const input = get(todoListInput);
+        const list = get(todoList);
+
+        const newList = list.map((listItem) =>
+          listItem.id === Number(id)
+            ? {
+                ...listItem,
+                title: input.title,
+                contents: input.contents,
+              }
+            : listItem,
+        );
+        set(todoList, newList);
+
+        reset(editState);
         navigate('/');
       },
     [],

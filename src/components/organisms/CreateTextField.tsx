@@ -1,11 +1,12 @@
 import { useRecoilValue } from 'recoil';
 import { TextField } from '@mui/material';
 
-import { todoListInput, useOnChange } from 'store';
+import { todoListInput, useOnChange, useResetInput } from 'store';
 
 export default function CreateTextField() {
   const input = useRecoilValue(todoListInput);
   const onChange = useOnChange();
+  useResetInput();
 
   return (
     <>
